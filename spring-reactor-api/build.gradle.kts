@@ -28,6 +28,7 @@ dependencies {
     implementation("io.projectreactor:reactor-core:3.4.14")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.1.5")
     implementation("com.sksamuel.hoplite:hoplite-core:1.4.16")
+    implementation("com.sksamuel.hoplite:hoplite-json:1.4.16")
 
 }
 

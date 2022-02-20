@@ -9,6 +9,7 @@ data class ApiConfig(val host: String, val port: Int)
 
 data class Config(val database: DBConfig, val api: ApiConfig)
 
-fun getConfig() =
-    ConfigLoader()
-        .loadConfig<Config>()
+fun getConfig(): Result<Config> =
+    ConfigLoader().runCatching {
+        loadConfigOrThrow("/config.json")
+    }

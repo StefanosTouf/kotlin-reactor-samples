@@ -10,33 +10,34 @@ import reactor.netty.http.server.HttpServer
 
 
 fun main(): Unit = runBlocking {
-    val (dbConfig, apiConfig) = getConfig().mapInvalid(log).getUnsafe()
-    val sqlClient = getClient(dbConfig, PersonTable, DogTable)
+    getConfig().map { (dbConfig, apiConfig) ->
+        val sqlClient = getClient(dbConfig, PersonTable, DogTable)
 
-    flowOf(sqlClient.createTableIfNotExists(PersonTable).asFlow(),
-           sqlClient.createTableIfNotExists(DogTable).asFlow())
-        .flattenMerge()
-        .collect {}
+        sqlClient.createTableIfNotExists(PersonTable)
+            .flatMap { sqlClient.createTableIfNotExists(DogTable) }
+            .subscribe()
 
-    makeRoutes(GenericRepo,
-               log,
-               sqlClient,
-               GenericService,
-               SerdesImpl,
-               TransformersImpl)
-        .let {
-            ReactorHttpHandlerAdapter(RouterFunctions.toHttpHandler(it))
-        }.runCatching {
-            HttpServer.create()
-                .host(apiConfig.host)
-                .port(apiConfig.port)
-                .handle(this)
-                .bindNow()
-                .onDispose()
-                .block()
-        }.onFailure {
-            log(it)
-        }.getOrThrow()
+        makeRoutes(GenericRepo,
+                   log,
+                   sqlClient,
+                   GenericService,
+                   SerdesImpl,
+                   TransformersImpl)
+            .let {
+                ReactorHttpHandlerAdapter(RouterFunctions.toHttpHandler(it))
+            }.let {
+                HttpServer.create()
+                    .host(apiConfig.host)
+                    .port(apiConfig.port)
+                    .handle(it)
+                    .bindNow()
+                    .onDispose()
+                    .block()
+            }
+    }.onFailure {
+        log("Couldn't start because of: $it")
+    }
+
 }
 
 fun makeRoutes(genericRepo: Repo,
