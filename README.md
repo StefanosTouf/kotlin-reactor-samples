@@ -4,3 +4,5 @@ The samples are:
 * `reactor-rabbitmq`, containing a small service showing how one can use reactor-rabbit with kotlin to consume from and publish to rabbitmq queues. This service uses flows to interface with the reactor publishers
 
 * `spring-reactor-api` containing a small api connected to a database using spring libraries (spring-r2dbc, spring-webflux). The spring dependencies are used outside the springboot runtime and thus there isnt an ioc container for dependency injection. Using reactor as a backbone, one can effectively and easily use the reactive spring dependencies on their own. This takes out a lot of the spring "magic", making the codebase more functional and, from my observations, more appropriate for smaller services.
+
+i hope someone finds this useful :)
